@@ -2,18 +2,29 @@
 
 Uploadify = {
 	initialize: function() {
-		if(!jQuery().uploadify) {
-			document.write('<script type="text/javascript" src="'+UploadifyConfig.jsUrl+'lib/jquery.uploadify.min.js"><\/script>');
-		}
-
-	}
-	,response: function(response) {
-		var data = $.parseJSON(response);
-		if (data.success) {
-			this.success(data.data);
+		if (UploadifyConfig.uploadiFive) {
+			if(!jQuery().uploadifive) {
+				document.write('<script type="text/javascript" src="'+UploadifyConfig.jsUrl+'lib/jquery.uploadifive.min.js"><\/script>');
+			}
 		}
 		else {
-			this.error(data.message);
+			if(!jQuery().uploadify) {
+				document.write('<script type="text/javascript" src="'+UploadifyConfig.jsUrl+'lib/jquery.uploadify.min.js"><\/script>');
+			}
+		}
+	}
+	,response: function(response) {
+		if (response == 'Access denied') {
+			this.error(response);
+		}
+		else {
+			var data = $.parseJSON(response);
+			if (data.success) {
+				this.success(data.data);
+			}
+			else {
+				this.error(data.message);
+			}
 		}
 	}
 	,success: function (data) {

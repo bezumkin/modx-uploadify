@@ -51,6 +51,7 @@ class Uploadify {
 				
 				,'authSnippet' => null
 				,'host' => null
+				,'uploadiFive' => 0
 				
 			),$config);
 
@@ -76,13 +77,20 @@ class Uploadify {
 			UploadifyConfig = {
 				jsUrl: "'.$this->config['jsUrl'].'web/"
 				,cssUrl: "'.$this->config['cssUrl'].'web/"
+				,uploadiFive: '.$this->config['uploadiFive'].'
 			};
 			if(typeof jQuery == "undefined") {
 				document.write("<script type=\"text/javascript\" src=\"'.$this->config['jsUrl'].'web/lib/jquery-1.9.0.min.js\"><\/script>");
 			}
 		</script>');
 		$this->modx->regClientScript($this->config['jsUrl'].'web/uploadify.js');
-		$this->modx->regClientCSS($this->config['cssUrl'].'web/uploadify.css');
+		
+		if ($this->config['uploadiFive']) {
+			$this->modx->regClientCSS($this->config['cssUrl'].'web/uploadifive.css');
+		}
+		else {
+			$this->modx->regClientCSS($this->config['cssUrl'].'web/uploadify.css');
+		}
 		
 		$timestamp = time();
 		$placeholders = array(
