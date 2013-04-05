@@ -1,0 +1,1 @@
+[[%uf_frontend_auth_required]]
