@@ -2,32 +2,29 @@
 <model package="uploadify" version="1.1" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" phpdoc-package="tickets">
 
 	<object class="uFile" table="uploadify_files" extends="xPDOSimpleObject">
-		<field key="uid" dbtype="int" precision="10" phptype="integer" attributes="unsigned" null="false" default="0" />
-		<field key="timestamp" dbtype="datetime" phptype="datetime" null="false" />
+		<field key="source" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+		<field key="parent" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+		<field key="name" dbtype="varchar" precision="255" phptype="string" null="false" />
+		<field key="description" dbtype="text" phptype="string" null="true" />
+		<field key="path" dbtype="varchar" precision="255" phptype="string" null="false" />
+		<field key="file" dbtype="varchar" precision="255" phptype="string" null="false" />
+		<field key="type" dbtype="varchar" precision="50" phptype="string" null="true" />
+		<field key="size" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+		<field key="createdon" dbtype="datetime" phptype="datetime" null="true" default="0000-00-00 00:00:00" />
+		<field key="createdby" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+		<field key="url" dbtype="varchar" precision="255" phptype="string" null="false" />
+		<field key="ip" dbtype="text" phptype="json" null="false" />
 
-		<field key="path" dbtype="text" phptype="string" null="false" default="" />
-		<field key="url" dbtype="text" phptype="string" null="false" default="" />
-		<field key="file" dbtype="varchar" precision="50" phptype="string" null="false" default="" />
-		
-		<field key="size" dbtype="int" precision="10" phptype="integer" null="false" default="" />
-		<field key="ip" dbtype="varchar" precision="16" phptype="string" null="false" default="0.0.0.0" />
-
-		<field key="host" dbtype="varchar" precision="50" phptype="string" null="true" />
-
-		<index alias="uid" name="uid" primary="false" unique="false" type="BTREE">
-			<column key="uid" length="" collation="A" null="false" />
+		<index alias="type" name="type" primary="false" unique="false" type="BTREE" >
+			<column key="type" length="" collation="A" null="false" />
 		</index>
-		<index alias="timestamp" name="timestamp" primary="false" unique="false" type="BTREE">
-			<column key="timestamp" length="" collation="A" null="false" />
-		</index>
-		<index alias="path" name="path" primary="false" unique="false" type="BTREE">
-			<column key="path" length="50" collation="A" null="false" />
-		</index>
-		<index alias="host" name="host" primary="false" unique="false" type="BTREE">
-			<column key="host" length="" collation="A" null="false" />
+		<index alias="parent" name="parent" primary="false" unique="false" type="BTREE" >
+			<column key="parent" length="" collation="A" null="false" />
 		</index>
 
-		<aggregate alias="User" class="modUser" local="uid" foreign="id" cardinality="one" owner="foreign" />
+		<composite alias="Children" class="uFile" local="id" foreign="parent" cardinality="many" owner="local" />
+		<aggregate alias="Parent" class="uFile" local="parent" foreign="id" cardinality="one" owner="foreign" />
+		<aggregate alias="User" class="modUser" local="createdby" foreign="id" cardinality="one" owner="foreign" />
 	</object>
 
 

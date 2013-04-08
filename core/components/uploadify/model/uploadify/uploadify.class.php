@@ -1,6 +1,9 @@
 <?php
 
 class Uploadify {
+	/* @var modX $modx */
+	public $modx;
+	public $initialized = array();
 
 
 	function __construct(modX &$modx,array $config = array()) {
@@ -21,6 +24,7 @@ class Uploadify {
 				,'cssUrl' => $assetsUrl.'css/'
 				,'jsUrl' => $assetsUrl.'js/'
 				,'imagesUrl' => $assetsUrl.'images/'
+				,'actionUrl' => $assetsUrl.'action.php'
 
 				//,'connectorUrl' => $connectorUrl
 
@@ -30,55 +34,130 @@ class Uploadify {
 				//,'templatesPath' => $corePath.'elements/templates/'
 				//,'chunkSuffix' => '.chunk.tpl'
 				//,'snippetsPath' => $corePath.'elements/snippets/'
-				//,'processorsPath' => $corePath.'processors/'
+				,'processorsPath' => $corePath.'processors/'
 
 				,'maxFilesize' => 1048576
 				,'fileExtensions' => 'jpg,jpeg,png'
 				,'imageExtensions' => 'jpg,jpeg,png'
 				,'imageMaxWidth' => 1280
 				,'imageMaxHeight' => 720
-				,'thumbMinWidth' => 720
-				,'thumbMinHeight' => 360
-				,'thumbWidth' => 300
-				,'thumbHeight' => 176
+				,'imageQuality' => 99
+				//,'thumbMinWidth' => 720
+				//,'thumbMinHeight' => 360
+				,'thumbWidth' => 320
+				,'thumbHeight' => 240
 				,'thumbZC' => 'T'
-				,'filesPath' => str_replace(MODX_BASE_PATH, '', $assetsPath) . 'files/'
-				,'filesUrl' => $assetsUrl . 'files/'
+				,'thumbBG' => 'ffffff'
+				,'thumbFormat' => 'jpg'
+				,'thumbQuality' => 90
+				,'source' => $this->modx->getOption('uf_source_default', null, 1, true)
+				,'listThumbSize' => '320x240,640x480'
+				,'listThumbZC' => '0,C'
+				,'listThumbBG' => 'ffffff,000000'
 
 				,'tplForm' => 'tpl.Uploadify.form'
 				,'tplImage' => 'tpl.Uploadify.image'
 				,'tplFile' => 'tpl.Uploadify.file'
 				,'tplAuth' => 'tpl.Uploadify.auth'
+				,'tplOption' => 'tpl.Uploadify.option'
 
 				,'authSnippet' => null
 				,'host' => null
-				,'uploadiFive' => false
 
 			),$config);
 
-			$this->config['fileExtensions'] = explode(',', $this->config['fileExtensions']);
-			$this->config['imageExtensions'] = explode(',', $this->config['imageExtensions']);
-			$this->config['filesPath'] = str_replace('//', '/', MODX_BASE_PATH . $this->config['filesPath'] . '/');
-			$this->config['filesUrl'] = str_replace('//', '/', $this->config['filesUrl'] . '/');
-
-			$_SESSION['UploadifyConfig'] = $this->config;
+			$tmp = array('fileExtensions','imageExtensions','listThumbSize','listThumbZC','listThumbBG');
+			foreach ($tmp as $v) {
+				$this->config[$v] = array_map('trim', explode(',', $this->config[$v]));
+			}
 		}
+
+		$tmp = array('ThumbSize','ThumbZC','ThumbBG');
+		foreach ($tmp as $v) {
+			$this->config['option'.$v] = isset($_SESSION['UploadifyConfig']['option'.$v]) && in_array($_SESSION['UploadifyConfig']['option'.$v], $this->config['list'.$v])
+				? $_SESSION['UploadifyConfig']['option'.$v]
+				: $this->config['list'.$v][0];
+		}
+
+		if (!empty($this->config['optionThumbSize'])) {
+			$tmp = array_map('trim', explode('x', $this->config['optionThumbSize']));
+			if (!empty($tmp[0]) && !empty($tmp[1])) {
+				$this->config['thumbWidth'] = $tmp[0];
+				$this->config['thumbHeight'] = $tmp[1];
+			}
+		}
+		if (isset($this->config['optionThumbZC']) && $this->config['optionThumbZC'] != '') {
+			$this->config['thumbZC'] = $this->config['optionThumbZC'];
+		}
+		if (isset($this->config['optionThumbBG']) && $this->config['optionThumbBG'] != '') {
+			$this->config['thumbBG'] = $this->config['optionThumbBG'];
+		}
+
+		$_SESSION['UploadifyConfig'] = $this->config;
 
 		$this->modx->addPackage('uploadify',$this->config['modelPath']);
 		$this->modx->lexicon->load('uploadify:default');
 	}
 
 
+	/**
+	 * Initializes component into different contexts.
+	 *
+	 * @param string $ctx The context to load. Defaults to web.
+	 * @param array $scriptProperties Properties for initialization.
+	 */
+	public function initialize($ctx = 'web', $scriptProperties = array()) {
+		$this->config = array_merge($this->config, $scriptProperties);
+		$this->config['ctx'] = $ctx;
+		if (!empty($this->initialized[$ctx])) {
+			return true;
+		}
+		switch ($ctx) {
+			case 'mgr': break;
+			default:
+				if (!MODX_API_MODE) {
+					$config = $this->makePlaceholders($this->config);
+					if ($css = $this->modx->getOption('uf_frontend_css')) {
+						$this->modx->regClientCSS(str_replace($config['pl'], $config['vl'], $css));
+					}
+					if ($js = $this->modx->getOption('uf_frontend_js')) {
+						$time = time();
+						$this->modx->regClientStartupScript(str_replace('					', '', '
+						<script type="text/javascript">
+							UploadifyConfig = {
+								jsUrl: "'.$this->config['jsUrl'].'web/"
+								,actionUrl: "'.$this->config['actionUrl'].'"
+								,cssUrl: "'.$this->config['cssUrl'].'web/"
+								,uploadiFive: '.$this->config['uploadiFive'].'
+
+							};
+							if(typeof jQuery == "undefined") {
+								document.write("<script src=\""+UploadifyConfig.jsUrl+"lib/jquery-1.9.1.min.js\" type=\"text/javascript\"><\/script>");
+							}
+						</script>
+						'), true);
+						$this->modx->regClientScript(str_replace($config['pl'], $config['vl'], $js));
+					}
+				}
+				$this->initialized[$ctx] = true;
+				break;
+		}
+		return true;
+	}
+
+
 	/* Verify and set setting of file processing
 	 *
-	 * @var string $key Key of setting
-	 * @var mixed $value Value of setting
+	 * @param string $key Key of setting
+	 * @param mixed $value Value of setting
 	 * @return boolean
 	 * */
-	public function setSetting($key, $value) {
-		$_SESSION['UploadifyConfig'][$key] = $value;
-
-		return true;
+	public function setOption($key, $value) {
+		if (array_key_exists('list'.$key, $this->config) && in_array($value, $this->config['list'.$key])) {
+			$_SESSION['UploadifyConfig']['option'.$key] = $value;
+			return $this->success();
+		}
+		return $this->failure($this->modx->lexicon('uf_err_option'));
 	}
 
 	/* Loads uploading form to frontend and registers scripts
@@ -89,21 +168,23 @@ class Uploadify {
 		if (!$this->checkAuth()) {
 			return $this->modx->getChunk($this->config['tplAuth']);
 		}
-
-		$this->modx->regClientStartupScript('	<script type="text/javascript">
-			UploadifyConfig = {
-				jsUrl: "'.$this->config['jsUrl'].'web/"
-				,cssUrl: "'.$this->config['cssUrl'].'web/"
-				,uploadiFive: '.$this->config['uploadiFive'].'
-			};
-		</script>');
-		$this->modx->regClientScript($this->config['jsUrl'].'web/uploadify.js');
-
-		if ($this->config['uploadiFive']) {
-			$this->modx->regClientCSS($this->config['cssUrl'].'web/uploadifive.css');
+		$this->initialize($this->modx->context->key);
+		$extensions = array();
+		foreach ($this->config['fileExtensions'] as $v) {
+			$extensions[] = '*.'.$v;
 		}
-		else {
-			$this->modx->regClientCSS($this->config['cssUrl'].'web/uploadify.css');
+
+		$tmp = array('ThumbSize', 'ThumbZC', 'ThumbBG');
+		$listThumbSize = $listThumbZC = $listThumbBG = '';
+		foreach ($tmp as $v) {
+			foreach ($this->config['list'.$v] as $v2) {
+				$arr = array(
+					'name' => $this->modx->lexicon('uf_frontend_option_'.$v2)
+					,'value' => $v2
+					,'selected' => !empty($this->config['option'.$v]) && $this->config['option'.$v] == $v2 ? 'selected' : ''
+				);
+				${'list'.$v} .= $this->modx->getChunk($this->config['tplOption'], $arr);
+			}
 		}
 
 		$timestamp = time();
@@ -111,16 +192,20 @@ class Uploadify {
 			'timestamp' => $timestamp
 			,'hash' => $this->getHash($timestamp)
 			,'assetsUrl' => $this->config['assetsUrl']
-			,'maxFilesize' => $this->config['maxFilesize']
+			,'actionUrl' => $this->config['actionUrl']
+			,'maxFilesize' => round($this->config['maxFilesize'] / 1024 / 1024, 2).'Mb'
+			,'fileExtensions' => implode('; ', $extensions)
+			,'listThumbSize' => str_replace('uf_frontend_option_', '', $listThumbSize)
+			,'listThumbZC' => str_replace('uf_frontend_option_', '', $listThumbZC)
+			,'listThumbBG' => str_replace('uf_frontend_option_', '', $listThumbBG)
 		);
-
 		return $this->modx->getChunk($this->config['tplForm'], $placeholders);
 	}
 
 
 	/* Main processing method
 	 *
-	 * @var array $data Array with data of uploading file
+	 * @param array $data Array with data of uploading file
 	 * @return json $response
 	 * */
 	public function uploadFile($data) {
@@ -133,21 +218,21 @@ class Uploadify {
 
 		// Main verifications
 		if (!$file = is_uploaded_file($data['tmp_name'])) {
-			return $this->failure('uploadify_err_nofile');
+			return $this->failure('uf_err_nofile');
 		}
 		else if (!in_array($data['extension'], $this->config['fileExtensions'])) {
-			return $this->failure('uploadify_err_extension');
+			return $this->failure('uf_err_extension');
 		}
 		else if ($data['size'] > $this->config['maxFilesize']) {
-			return $this->failure('uploadify_err_size');
+			return $this->failure('uf_err_size');
 		}
 
 		// Save image
 		if (in_array($data['extension'], $this->config['imageExtensions'])) {
 			if ($file = $this->saveImage($data)) {
 				$arr = array(
-					'image' => $this->config['filesUrl'] . $file['path'] . $file['image']
-					,'thumb' => !empty($file['thumb']) ? $this->config['filesUrl'] . $file['path'] . $file['thumb'] : ''
+					'image' => $this->modx->getOption('site_url') . substr($file['image'], 1)
+					,'thumb' => !empty($file['thumb']) ? $this->modx->getOption('site_url') . substr($file['thumb'], 1) : ''
 				);
 				return $this->success($this->modx->getChunk($this->config['tplImage'], $arr));
 			}
@@ -156,80 +241,100 @@ class Uploadify {
 		else {
 			if ($file = $this->saveFile($data)) {
 				$arr = array(
-					'file' => $this->config['filesUrl'] . $file['path'] . $file['file']
+					'file' => $this->modx->getOption('site_url') . substr($file['file'], 1)
 				);
 				return $this->success($this->modx->getChunk($this->config['tplFile'], $arr));
 			}
 		}
 
-		return $this->failure('uploadify_err');
+		return $this->failure('uf_err_unknown');
 	}
 
 
 	/* Converts and saves uploaded image
 	 *
-	 * @var array $data Array with data of uploading file
+	 * @param array $data Array with data of uploading file
 	 * @return mixed
 	 * */
 	public function saveImage($data) {
 		if (is_uploaded_file($data['tmp_name'])) {
 			$hash = md5($data['tmp_name'] . rand());
 			$path = $hash[0] .'/'. $hash[1] . '/' . $hash[2] . '/';
-			$fullPath = $this->config['filesPath'] . $path;
 			$filename = $hash . '.' . $data['extension'];
-			$thumbname = $hash . '_thumb.' . $data['extension'];
 
-			if ($this->checkPath($fullPath)) {
-				move_uploaded_file($data['tmp_name'], $fullPath . $filename);
+			/* @var modProcessorResponse $response*/
+			$response = $this->runProcessor('web/file/create', array(
+				'source' => $this->config['source']
+				,'name' => @$data['name']
+				,'description' => @$data['description']
+				,'path' => $path
+				,'file' => $filename
+				,'type' => 'image'
+				,'raw' => file_get_contents($data['tmp_name'])
+			));
+			if ($response->isError()) {
+				return $this->failure($response->getAllErrors());
+			}
 
-				if (file_exists($fullPath . $filename)) {
-					$dimension = getimagesize($fullPath . $filename);
+			/* @var uFile $file */
+			$file = $this->modx->getObject('uFile', $response->response['object']['id']);
+			$arr = array(
+				'image' => $file->get('url')
+			);
+			$dimension = getimagesize($data['tmp_name']);
 
-					// Generate image
-					$params = array(
-						'w' => $dimension[0] > $this->config['imageMaxWidth'] ? $this->config['imageMaxWidth'] : $dimension[0]
-						,'h' => $dimension[1] > $this->config['imageMaxHeight'] ? $this->config['imageMaxHeight'] : $dimension[1]
-						,'bg' => 'ffffff'
-						,'q' => 95
-						,'zc' => 0
-						,'f' => substr($data['extension'], 1)
-					);
-					$this->phpThumb($fullPath . $filename, $fullPath . $filename, $params);
-					$arr = array(
-						'path' => $path
-						,'image' => $filename
-					);
-					if ($size = filesize($fullPath . $filename)) {
-						$entry = $this->modx->newObject('uFile', array(
-							'uid' => !empty($_SESSION['uid']) ? $_SESSION['uid'] : $this->modx->user->id
-							,'timestamp' => time()
-							,'path' => $fullPath
-							,'url' => $this->config['filesUrl'] . $path
-							,'file' => $filename
-							,'size' => $size
-							,'ip' => $_SERVER['REMOTE_ADDR']
-							,'host' => $this->config['host']
-						));
-						$entry->save();
+
+			//if ($dimension[0] > $this->config['thumbMinWidth'] || $dimension[1] > $this->config['thumbMinHeight']) {
+			if ($dimension[0] > $this->config['thumbWidth'] || $dimension[1] > $this->config['thumbHeight']) {
+				$options = array(
+					'w' => !$this->config['thumbZC'] && $dimension[0] < $this->config['thumbWidth'] ? $dimension[0] : $this->config['thumbWidth']
+					,'h' => !$this->config['thumbZC'] && $dimension[1] < $this->config['thumbHeight'] ? $dimension[1] : $this->config['thumbHeight']
+					,'bg' => $this->config['thumbBG']
+					,'q' => $this->config['thumbQuality']
+					,'zc' => $this->config['thumbZC']
+					,'f' => $this->config['thumbFormat']
+				);
+				$arr['thumb'] = $file->makeThumbnail($options);
+			}
+
+			$options = array(
+				'q' => $this->config['imageQuality']
+			);
+			if ($dimension[0] > $this->config['imageMaxWidth'] && $dimension[1] > $this->config['imageMaxHeight']) {
+				if ($dimension[0] > $dimension[1]) {
+					$tmp = round($dimension[0] / $dimension[1], 2);
+					$tmp2 = round($dimension[1] / $tmp);
+					if ($tmp2 > $this->config['imageMaxHeight']) {
+						$options['h'] = $this->config['imageMaxHeight'];
 					}
-
-					// Generate thumb, if needed
-					if ($dimension[0] > $this->config['thumbMinWidth'] || $dimension[1] > $this->config['thumbMinHeight']) {
-						$params = array(
-							'w' => $this->config['thumbWidth']
-							,'h' => $this->config['thumbHeight']
-							,'bg' => 'ffffff'
-							,'q' => 95
-							,'zc' => $this->config['thumbZC']
-							,'f' => substr($data['extension'], 1)
-						);
-						$this->phpThumb($fullPath . $filename, $fullPath . $thumbname, $params);
-						$arr['thumb'] = $thumbname;
+					else {
+						$options['w'] = $this->config['imageMaxWidth'];
 					}
-
-					return $arr;
+				}
+				else {
+					$tmp = round($dimension[1] / $dimension[0], 2);
+					$tmp2 = round($dimension[0] / $tmp);
+					if ($tmp2 > $this->config['imageMaxWidth']) {
+						$options['w'] = $this->config['imageMaxWidth'];
+					}
+					else {
+						$options['h'] = $this->config['imageMaxHeight'];
+					}
 				}
 			}
+			else if ($dimension[0] > $this->config['imageMaxWidth']) {
+				$options['w'] = $this->config['imageMaxWidth'];
+			}
+			else if ($dimension[1] > $this->config['imageMaxHeight']) {
+				$options['h'] = $this->config['imageMaxHeight'];
+			}
+			else {
+				$options['w'] = $dimension[0];
+				$options['h'] = $dimension[1];
+			}
+
+			$file->Resize($options);
+			return $arr;
 		}
 		return false;
 	}
@@ -237,72 +342,39 @@ class Uploadify {
 
 	/* Saves uploaded non-image file
 	 *
-	 * @var array $data Array with data of uploading file
+	 * @param array $data Array with data of uploading file
 	 * @return mixed
 	 * */
 	public function saveFile($data) {
 		if (is_uploaded_file($data['tmp_name'])) {
 			$hash = md5($data['tmp_name'] . rand());
 			$path = $hash[0] .'/'. $hash[1] . '/' . $hash[2] . '/';
-			$fullPath = $this->config['filesPath'] . $path;
 			$filename = $hash . '.' . $data['extension'];
 
-			if ($this->checkPath($fullPath)) {
-				move_uploaded_file($data['tmp_name'], $fullPath . $filename);
-				if (file_exists($fullPath . $filename)) {
-					$arr = array(
-						'path' => $path
-						,'file' => $filename
-					);
-
-					if ($size = filesize($fullPath . $filename)) {
-						$entry = $this->modx->newObject('uFile', array(
-							'uid' => !empty($_SESSION['uid']) ? $_SESSION['uid'] : $this->modx->user->id
-							,'timestamp' => time()
-							,'path' => $fullPath
-							,'url' => $this->config['filesUrl'] . $path
-							,'file' => $filename
-							,'size' => $size
-							,'ip' => $_SERVER['REMOTE_ADDR']
-							,'host' => $this->config['host']
-						));
-						$entry->save();
-					}
-
-					return $arr;
-				}
-				else {
-					return $this->failure('uploadify_err_save');
-				}
+			/* @var modProcessorResponse $response*/
+			$response = $this->runProcessor('web/file/create', array(
+				'source' => $this->config['source']
+				,'name' => @$data['name']
+				,'description' => @$data['description']
+				,'path' => $path
+				,'file' => $filename
+				,'type' => 'file'
+				,'raw' => file_get_contents($data['tmp_name'])
+			));
+			if ($response->isError()) {
+				return $this->failure($response->getAllErrors());
 			}
-			else {
-				return $this->failure('uploadify_err_save');
-			}
+
+			/* @var uFile $file */
+			$file = $this->modx->getObject('uFile', $response->response['object']['id']);
+			$arr = array(
+				'file' => $file->get('url')
+			);
+
+			return $arr;
+
 		}
 		return false;
-	}
-
-
-	/* Checks and recursively create path for upload
-	 *
-	 * @var string $fullPath Full path for checking
-	 * @return boolean
-	 * */
-	public function checkPath($fullPath) {
-		$fullPath = explode('/', str_replace(MODX_BASE_PATH, '', $fullPath));
-
-		$path = '';
-		foreach ($fullPath as $v) {
-			if ($v == '') {continue;}
-
-			$path .= '/' . $v;
-			if (!file_exists(MODX_BASE_PATH . $path)) {
-				if (!mkdir(MODX_BASE_PATH . $path)) {
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 
@@ -311,12 +383,7 @@ class Uploadify {
 	 * @return boolean
 	 * */
 	function checkAuth() {
-		if (!empty($this->config['authSnippet'])) {
-			return $this->modx->runSnippet($this->config['authSnippet']);
-		}
-		else {
-			return true;
-		}
+		return !empty($this->config['authSnippet']) ? $this->modx->runSnippet($this->config['authSnippet'], $this->config) : true;
 	}
 
 
@@ -331,7 +398,7 @@ class Uploadify {
 
 	/* Shorthand for failure response
 	 *
-	 * @var sting $message Error message
+	 * @param sting $message Error message
 	 * */
 	public function failure($message) {
 		return $this->response($this->modx->lexicon($message), array(), false);
@@ -340,17 +407,17 @@ class Uploadify {
 
 	/* Shorthand for success response
 	 *
-	 * @var mixed $data Info for end user
+	 * @param mixed $data Info for end user
 	 * */
-	public function success($data) {
+	public function success($data = array()) {
 		return $this->response('', $data, true);
 	}
 
 
 	/* General method for returning result of work
 	 *
-	 * @var string $message Optional message to end user
-	 * @var mixed $data Any additional data for end user
+	 * @param string $message Optional message to end user
+	 * @param mixed $data Any additional data for end user
 	 * @return boolean $success Type of response
 	 * */
 	public function response($message = '', $data = array(), $success = true) {
@@ -364,30 +431,41 @@ class Uploadify {
 	}
 
 
-	/* Process image with specified parameters
+	/* Method for transform array to placeholdres
 	 *
-	 * @var string $src Source file
-	 * @var string $dst Destination file
-	 * @var array $params Array with processing parameters
-	 * @return boolean
+	 * @var array $array With keys and values
+	 * @return array $array Two nested arrays With placeholders and values
 	 * */
-	public function phpThumb($src, $dst, $params = array()) {
-		if (empty($dst)) {$dst = $src;}
-
-		require_once MODX_CORE_PATH.'model/phpthumb/phpthumb.class.php';
-		$phpThumb = new phpThumb();
-		$phpThumb->setSourceFilename($src);
-		foreach ($params as $k => $v) {
-			$phpThumb->setParameter($k, $v);
-		}
-
-		if ($phpThumb->GenerateThumbnail()) {
-			if ($phpThumb->RenderToFile($dst)) {
-				return true;
+	public function makePlaceholders(array $array = array(), $prefix = '') {
+		$result = array(
+			'pl' => array()
+			,'vl' => array()
+		);
+		foreach ($array as $k => $v) {
+			if (is_array($v)) {
+				$result = array_merge_recursive($result, $this->makePlaceholders($v, $k.'.'));
+			}
+			else {
+				$result['pl'][$prefix.$k] = '[[+'.$prefix.$k.']]';
+				$result['vl'][$prefix.$k] = $v;
 			}
 		}
-		$this->modx->log(modX::LOG_LEVEL_ERROR, print_r($phpThumb->debugmessages, true));
-		return false;
+		return $result;
 	}
 
+
+	/**
+	 * Shorthand for the call of processor
+	 *
+	 * @access public
+	 * @param string $action Path to processor
+	 * @param array $data Data to be transmitted to the processor
+	 * @return mixed The result of the processor
+	 */
+	public function runProcessor($action = '', $data = array()) {
+		if (empty($action)) {return false;}
+
+		return $this->modx->runProcessor($action, $data, array('processors_path' => $this->config['processorsPath']));
+
+	}
 }

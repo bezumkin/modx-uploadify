@@ -26,8 +26,8 @@ switch ($action) {
 		$modx->getParser()->processElementTags('', $response, false, false, '[[', ']]', array(), $maxIterations);
 		$modx->getParser()->processElementTags('', $response, true, true, '[[', ']]', array(), $maxIterations);
 	break;
-	case 'form/setting':
-		$response = $Uploadify->setSetting($_POST['key'], $_POST['value']);
+	case 'form/option':
+		$response = $Uploadify->setOption($_POST['key'], $_POST['value']);
 	break;
 	default: $response = json_encode(array('success' => false, 'message' => 'no action'));
 }
