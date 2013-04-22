@@ -299,6 +299,7 @@ class Uploadify {
 
 			$options = array(
 				'q' => $this->config['imageQuality']
+				,'bg' => $this->config['thumbBG']
 			);
 			if ($dimension[0] > $this->config['imageMaxWidth'] && $dimension[1] > $this->config['imageMaxHeight']) {
 				if ($dimension[0] > $dimension[1]) {
