@@ -1,6 +1,8 @@
 <li class="span3">
 	<div class="thumbnail">
-	  <img src="[[+thumb:default=`[[+image]]`]]" />
+		<a href="[[+image]]" target="_blank">
+			<img src="[[+thumb:default=`[[+image]]`]]" />
+		</a>
 		<div class="caption">
 			<span>[[%uf_frontend_image_direct]]</span>
 			<input type="text" value="[[+image]]" onclick="this.select();" />
