@@ -25,7 +25,7 @@ $tmp = array(
 	)
 	,'uploadiFive' => array(
 		'type' => 'combo-boolean'
-		,'value' => false
+		,'value' => true
 	)
 	,'fileExtensions' => array(
 		'type' => 'textfield'

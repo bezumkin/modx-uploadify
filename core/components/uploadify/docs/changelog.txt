@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.0.0 pl
+==============
+- Added UploadiFive in package.
+
 1.0.0 beta
 ==============
 - Initial release.
