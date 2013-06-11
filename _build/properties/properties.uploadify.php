@@ -126,7 +126,7 @@ foreach ($tmp as $k => $v) {
 		array(
 			'name' => $k
 			,'desc' => 'uf_prop_'.$k
-			,'lexicon' => 'modextra:properties'
+			,'lexicon' => 'uploadify:properties'
 		), $v
 	);
 }
