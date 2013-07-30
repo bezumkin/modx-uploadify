@@ -11,21 +11,22 @@ $tmp = array(
 );
 
 foreach ($tmp as $k => $v) {
-	/* @var modSnippet $snippet*/
+	/* @avr modSnippet $snippet */
 	$snippet = $modx->newObject('modSnippet');
 	$snippet->fromArray(array(
-		'id' => 0
-		,'name' => $k
+		'name' => $k
 		,'description' => ''
 		,'snippet' => getSnippetContent($sources['source_core'].'/elements/snippets/snippet.'.$v.'.php')
-		,'static' => 1
-		,'static_file' => 'uploadify/elements/snippets/snippet.'.$v.'.php'
+		,'static' => BUILD_SNIPPET_STATIC
+		,'source' => 1
+		,'static_file' => 'core/components/'.PKG_NAME_LOWER.'/elements/snippets/snippet.'.$v.'.php'
 	),'',true,true);
 
-	$properties = require dirname(dirname(__FILE__)) . '/properties/properties.'.$v.'.php';
+	$properties = include $sources['build'].'properties/properties.'.$v.'.php';
 	$snippet->setProperties($properties);
 
-	$snippets[$k] = $snippet;
+	$snippets[] = $snippet;
 }
 
+unset($properties);
 return $snippets;

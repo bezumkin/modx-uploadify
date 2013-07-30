@@ -23,8 +23,9 @@ foreach ($tmp as $k => $v) {
 		,'name' => $k
 		,'description' => ''
 		,'snippet' => file_get_contents($sources['source_core'].'/elements/chunks/chunk.'.$v.'.tpl')
-		//,'static' => 1
-		//,'static_file' => 'uploadify/elements/chunks/chunk.'.$v.'.tpl'
+		,'static' => BUILD_CHUNK_STATIC
+		,'source' => 1
+		,'static_file' => 'core/components/'.PKG_NAME_LOWER.'/elements/chunks/chunk.'.$v.'.tpl'
 	),'',true,true);
 
 	$chunks[$k] = $chunk;

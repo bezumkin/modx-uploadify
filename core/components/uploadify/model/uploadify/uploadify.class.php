@@ -283,18 +283,6 @@ class Uploadify {
 			);
 			$dimension = getimagesize($data['tmp_name']);
 
-			// Images from retina display can be halve resized
-			if ($this->config['fromRetina']) {
-				$tmp = array(
-					'w' => floor($dimension[0] / 2)
-					,'h' => floor($dimension[1] / 2)
-					,'q' => 100
-					,'zc' => 0
-					,'f' => $data['extension']
-				);
-				$file->Resize($tmp);
-			}
-
 			if ($dimension[0] > $this->config['thumbWidth'] || $dimension[1] > $this->config['thumbHeight']) {
 				$options = array(
 					'w' => !$this->config['thumbZC'] && $dimension[0] < $this->config['thumbWidth'] ? $dimension[0] : $this->config['thumbWidth']
@@ -311,6 +299,14 @@ class Uploadify {
 				'q' => $this->config['imageQuality']
 				,'bg' => $this->config['thumbBG']
 			);
+
+			// Images from retina display can be reduced twice
+			if ($this->config['fromRetina']) {
+				$dimension[0] = $options['w'] = floor($dimension[0] / 2);
+				$dimension[1] = $options['h'] = floor($dimension[1] / 2);
+			}
+
+			// Resizing image
 			if ($dimension[0] > $this->config['imageMaxWidth'] && $dimension[1] > $this->config['imageMaxHeight']) {
 				if ($dimension[0] > $dimension[1]) {
 					$tmp = round($dimension[0] / $dimension[1], 2);
