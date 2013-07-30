@@ -3,7 +3,7 @@ Changelog for Uploadify.
 1.1.0 pl
 ==============
 - Updated Uploadify files to their latest versions.
-
+- Added option "Reduce the source twice" for screenshots from "Retina" display.
 
 1.0.0 pl
 ==============

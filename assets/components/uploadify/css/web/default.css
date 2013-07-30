@@ -55,6 +55,12 @@
 	cursor: pointer;
 }
 
+#Uploadify .options .checkbox {
+	margin: 10px 0;
+}
+
+#Uploadify .options .checkbox small {color: #AAA;}
+#Uploadify .options .checkbox small a {color: #555;}
 
 
 /*

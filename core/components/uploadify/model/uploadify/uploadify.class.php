@@ -26,14 +26,7 @@ class Uploadify {
 				,'imagesUrl' => $assetsUrl.'images/'
 				,'actionUrl' => $assetsUrl.'action.php'
 
-				//,'connectorUrl' => $connectorUrl
-
-				//,'corePath' => $corePath
 				,'modelPath' => $corePath.'model/'
-				//,'chunksPath' => $corePath.'elements/chunks/'
-				//,'templatesPath' => $corePath.'elements/templates/'
-				//,'chunkSuffix' => '.chunk.tpl'
-				//,'snippetsPath' => $corePath.'elements/snippets/'
 				,'processorsPath' => $corePath.'processors/'
 
 				,'maxFilesize' => 1048576
@@ -54,6 +47,7 @@ class Uploadify {
 				,'listThumbSize' => '320x240,640x480'
 				,'listThumbZC' => '0,C'
 				,'listThumbBG' => 'ffffff,000000'
+				,'fromRetina' => isset($_SESSION['UploadifyConfig']['fromRetina']) ? $_SESSION['UploadifyConfig']['fromRetina'] : false
 
 				,'tplForm' => 'tpl.Uploadify.form'
 				,'tplImage' => 'tpl.Uploadify.image'
@@ -153,11 +147,16 @@ class Uploadify {
 	 * @return boolean
 	 * */
 	public function setOption($key, $value) {
-		if (array_key_exists('list'.$key, $this->config) && in_array($value, $this->config['list'.$key])) {
-			$_SESSION['UploadifyConfig']['option'.$key] = $value;
-			return $this->success();
+		if ($key == 'fromRetina') {
+			$_SESSION['UploadifyConfig']['fromRetina'] = (boolean) $value;
 		}
-		return $this->failure($this->modx->lexicon('uf_err_option'));
+		else if (array_key_exists('list'.$key, $this->config) && in_array($value, $this->config['list'.$key])) {
+			$_SESSION['UploadifyConfig']['option'.$key] = $value;
+		}
+		else {
+			return $this->failure($this->modx->lexicon('uf_err_option'));
+		}
+		return $this->success();
 	}
 
 	/* Loads uploading form to frontend and registers scripts
@@ -198,6 +197,7 @@ class Uploadify {
 			,'listThumbSize' => str_replace('uf_frontend_option_', '', $listThumbSize)
 			,'listThumbZC' => str_replace('uf_frontend_option_', '', $listThumbZC)
 			,'listThumbBG' => str_replace('uf_frontend_option_', '', $listThumbBG)
+			,'fromRetina' => $this->config['fromRetina']
 		);
 		return $this->modx->getChunk($this->config['tplForm'], $placeholders);
 	}
@@ -283,8 +283,18 @@ class Uploadify {
 			);
 			$dimension = getimagesize($data['tmp_name']);
 
+			// Images from retina display can be halve resized
+			if ($this->config['fromRetina']) {
+				$tmp = array(
+					'w' => floor($dimension[0] / 2)
+					,'h' => floor($dimension[1] / 2)
+					,'q' => 100
+					,'zc' => 0
+					,'f' => $data['extension']
+				);
+				$file->Resize($tmp);
+			}
 
-			//if ($dimension[0] > $this->config['thumbMinWidth'] || $dimension[1] > $this->config['thumbMinHeight']) {
 			if ($dimension[0] > $this->config['thumbWidth'] || $dimension[1] > $this->config['thumbHeight']) {
 				$options = array(
 					'w' => !$this->config['thumbZC'] && $dimension[0] < $this->config['thumbWidth'] ? $dimension[0] : $this->config['thumbWidth']

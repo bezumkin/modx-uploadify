@@ -16,6 +16,9 @@
 					<select name="ThumbBG" class="span2">[[+listThumbBG]]</select>
 				</span>
 			</div>
+			<label class="checkbox" for="fromRetina">
+				<input type="checkbox" name="fromRetina" id="fromRetina" value="1" [[+fromRetina:notempty=`checked`]] /> [[%uf_frontend_from_retina]]
+			</label>
 			<small>
 				[[%uf_frontend_file_extensions]]: [[+fileExtensions]]<br/>
 				[[%uf_frontend_max_filesize]]: [[+maxFilesize]]
@@ -55,7 +58,7 @@
 			,'buttonText': '[[%uf_frontend_upload]]'
 			,'fileSizeLimit' : '[[+maxFilesize]]'
 			,'removeCompleted': true
-			,'onUploadSuccess' : function(file, data, response) {
+			,'onUploadSuccess': function(file, data, response) {
 				Uploadify.response(data);
 			}
 			,'uploader': '[[+actionUrl]]'

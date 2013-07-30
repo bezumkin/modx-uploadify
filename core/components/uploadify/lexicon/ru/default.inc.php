@@ -28,6 +28,7 @@ $_lang['uf_frontend_max_filesize'] = 'Максимальный размер';
 $_lang['uf_frontend_thumb_size'] = 'Размер превью';
 $_lang['uf_frontend_thumb_zc'] = 'Приблизить и обрезать';
 $_lang['uf_frontend_thumb_bg'] = 'Цвет заливки';
+$_lang['uf_frontend_from_retina'] = 'Уменьшать исходник вдвое <small>(для скриншотов с дисплеев <a href="http://ru.wikipedia.org/wiki/Retina" target="_blank">Retina</a>)</small>';
 
 $_lang['uf_frontend_options_desc'] = '* Вы можете выбрать размер для генерации превью картинки. Если размер изображения меньше указанного для превью - оно не будет сгенерировано. Также можно указать, как именно генерировать превьюшку: сохранять пропорции, или приблизить и обрезать. При сохранении пропорций можно указать цвет для заливки пустого места.';
 $_lang['uf_frontend_option_0'] = 'Нет';
