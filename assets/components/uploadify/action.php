@@ -1,8 +1,9 @@
 <?php
-require_once dirname(dirname(dirname(dirname(__FILE__)))).'/config.core.php';
+require dirname(dirname(dirname(dirname(__FILE__)))).'/config.core.php';
+require MODX_CORE_PATH . '/config/config.inc.php';
 
 define('MODX_API_MODE', true);
-require dirname(MODX_CORE_PATH).'/index.php';
+require MODX_BASE_PATH . '/index.php';
 
 $modx->getService('error','error.modError');
 $modx->setLogLevel(modX::LOG_LEVEL_ERROR);

@@ -231,8 +231,15 @@ class Uploadify {
 		if (in_array($data['extension'], $this->config['imageExtensions'])) {
 			if ($file = $this->saveImage($data)) {
 				$arr = array(
-					'image' => $this->modx->getOption('site_url') . substr($file['image'], 1)
-					,'thumb' => !empty($file['thumb']) ? $this->modx->getOption('site_url') . substr($file['thumb'], 1) : ''
+					'image' => strpos($file['image'], '://') === false
+						? $this->modx->getOption('site_url') . substr($file['image'], 1)
+						: $file['thumb'],
+					'thumb' => !empty($file['thumb'])
+						? (strpos($file['thumb'], '://') === false
+							? $this->modx->getOption('site_url') . substr($file['thumb'], 1)
+							: ''
+						)
+						: ''
 				);
 				return $this->success($this->modx->getChunk($this->config['tplImage'], $arr));
 			}

@@ -1,5 +1,10 @@
 Changelog for Uploadify.
 
+1.1.1 pl
+==============
+- Fixed work with Amazon S3
+- Fixed work with non-standard core path
+
 1.1.0 pl
 ==============
 - Updated Uploadify files to their latest versions.
