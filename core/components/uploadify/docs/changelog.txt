@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.1.2 pl
+==============
+- Progressive images.
+
 1.1.1 pl
 ==============
 - Fixed work with Amazon S3

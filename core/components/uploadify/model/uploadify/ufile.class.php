@@ -90,15 +90,17 @@ class uFile extends xPDOSimpleObject {
 			$phpThumb->setParameter($k, $v);
 		}
 
-		if ($phpThumb->GenerateThumbnail() && $phpThumb->RenderOutput()) {
-			@unlink($phpThumb->sourceFilename);
-			@unlink($tmp);
-			return $phpThumb->outputImageData;
+		if ($phpThumb->GenerateThumbnail()) {
+			ImageInterlace($phpThumb->gdimg_output, true);
+			if ($phpThumb->RenderOutput()) {
+				@unlink($phpThumb->sourceFilename);
+				@unlink($tmp);
+				return $phpThumb->outputImageData;
+			}
 		}
-		else {
-			$this->xpdo->log(modX::LOG_LEVEL_ERROR, 'Could not resize "'.$this->get('url').'". '.print_r($phpThumb->debugmessages,1));
-			return false;
-		}
+
+		$this->xpdo->log(modX::LOG_LEVEL_ERROR, 'Could not resize "'.$this->get('url').'". '.print_r($phpThumb->debugmessages,1));
+		return false;
 	}
 
 
