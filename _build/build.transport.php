@@ -256,9 +256,13 @@ $builder->putVehicle($vehicle);
 
 /* now pack in the license file, readme and setup options */
 $package_attributes = array(
-	'changelog' => file_get_contents($sources['docs'] . 'changelog.txt')
-	,'license' => file_get_contents($sources['docs'] . 'license.txt')
-	,'readme' => file_get_contents($sources['docs'] . 'readme.txt')
+	'changelog' => file_get_contents($sources['docs'] . 'changelog.txt'),
+	'license' => file_get_contents($sources['docs'] . 'license.txt'),
+	'readme' => file_get_contents($sources['docs'] . 'readme.txt'),
+	'chunks' => $BUILD_CHUNKS,
+	'setup-options' => array(
+		'source' => $sources['build'].'setup.options.php',
+	),
 );
 if (file_exists($sources['build'].'setup.options.php')) {
 	$package_attributes['setup-options'] = array(
@@ -279,8 +283,8 @@ $tend= $mtime;
 $totalTime= ($tend - $tstart);
 $totalTime= sprintf("%2.4f s", $totalTime);
 
+$signature = $builder->getSignature();
 if (defined('PKG_AUTO_INSTALL') && PKG_AUTO_INSTALL) {
-	$signature = $builder->getSignature();
 	$sig = explode('-',$signature);
 	$versionSignature = explode('.',$sig[1]);
 
@@ -312,6 +316,9 @@ if (defined('PKG_AUTO_INSTALL') && PKG_AUTO_INSTALL) {
 		$package->save();
 	}
 	$package->install();
+}
+if (!empty($_GET['download'])) {
+	echo '<script>document.location.href = "/core/packages/' . $signature.'.transport.zip' . '";</script>';
 }
 
 $modx->log(modX::LOG_LEVEL_INFO,"\n<br />Execution time: {$totalTime}\n");

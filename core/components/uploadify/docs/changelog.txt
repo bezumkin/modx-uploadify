@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.1.3 pl
+==============
+- Ability to overwrite chunks on package upgrade.
+
 1.1.2 pl
 ==============
 - Progressive images.
