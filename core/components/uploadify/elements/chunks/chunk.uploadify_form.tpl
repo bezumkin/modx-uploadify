@@ -3,17 +3,17 @@
 		<span class="title">[[%uf_frontend_form_options]]</span>
 		<div class="options">
 			<div class="row">
-				<span class="span2 center">
+				<span class="span2 col-md-4 center">
 					[[%uf_frontend_thumb_size]]<br/>
-					<select name="ThumbSize" class="span2">[[+listThumbSize]]</select>
+					<select name="ThumbSize" class="span2 form-control">[[+listThumbSize]]</select>
 				</span>
-				<span class="span2 center">
+				<span class="span2 col-md-4 center">
 					[[%uf_frontend_thumb_zc]]<br/>
-					<select name="ThumbZC" class="span2">[[+listThumbZC]]</select>
+					<select name="ThumbZC" class="span2 form-control">[[+listThumbZC]]</select>
 				</span>
-				<span class="span2 center">
+				<span class="span2 col-md-4 center">
 					[[%uf_frontend_thumb_bg]]<br/>
-					<select name="ThumbBG" class="span2">[[+listThumbBG]]</select>
+					<select name="ThumbBG" class="span2 form-control">[[+listThumbBG]]</select>
 				</span>
 			</div>
 			<label class="checkbox" for="fromRetina">
@@ -37,7 +37,8 @@
 
 	<div class="fieldset response">
 		<span class="title">[[%uf_frontend_form_uploaded]]</span>
-		<ul id="UploadifyResponse" class="thumbnails"></ul>
+		<div id="UploadifyResponse"></div>
+		<div class="clearfix"></div>
 	</div>
 
 	<br/><i><small>[[%uf_frontend_options_desc]]</small></i>

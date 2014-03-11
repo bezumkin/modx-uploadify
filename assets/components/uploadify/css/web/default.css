@@ -6,6 +6,9 @@
 	border-radius: 5px;
 	padding: 20px 10px 0 10px;
 }
+#Uploadify .fieldset label {
+	font-weight: normal;
+}
 #Uploadify .fieldset .title {
 	position: relative;
 	padding: 3px;
@@ -24,12 +27,12 @@
 }
 #Uploadify .fieldset.response {
 	margin: 50px auto 0 auto;
-	width: 900px;
+	width: 970px;
 	min-height: 100px;
 }
-#Uploadify .fieldset.response .span3:nth-child(3n+4) {clear:left;}
-#Uploadify .fieldset.response input, .fieldset.response textarea {width: 95%;}
-#Uploadify .fieldset.response textarea  {height: 30px; resize: none;}
+#Uploadify .fieldset.response .span3:nth-child(4n+5) {clear:left;}
+#Uploadify .fieldset.response input, .fieldset.response textarea {font-size: .8em;padding:0;}
+#Uploadify .fieldset.response textarea  {resize: none;}
 #Uploadify .fieldset.options .options {position: relative;top: -18px;}
 
 #Uploadify #UploadifyQueue {
