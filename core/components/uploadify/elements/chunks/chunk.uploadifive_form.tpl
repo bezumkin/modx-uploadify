@@ -53,6 +53,7 @@
 				'timestamp': '[[+timestamp]]'
 				,'token': '[[+hash]]'
 				,'action': 'uploadFile'
+				,pageId: '[[*id]]'
 			}
 			,'fileTypeDesc' : '[[%uf_frontend_images]]'
 			,'fileTypeExts' : '[[+fileExtensions]]'

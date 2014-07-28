@@ -25,18 +25,22 @@ if ($object->xpdo) {
 						,'value' => $assets . '/uploadify/'
 					)
 					,'baseUrl' => array(
-							'name' => 'baseUrl','desc' => 'prop_file.baseUrl_desc','type' => 'textfield','lexicon' => 'core:source'
-							,'value' => $assets . '/uploadify/'
-						)
+						'name' => 'baseUrl','desc' => 'prop_file.baseUrl_desc','type' => 'textfield','lexicon' => 'core:source'
+						,'value' => $assets . '/uploadify/'
+					)
+					,'baseUrlRelative' => array(
+						'name' => 'baseUrlRelative','desc' => 'prop_file.baseUrlRelative_desc','type' => 'combo-boolean','lexicon' => 'core:source'
+						,'value' => false
+					)
 					,'imageExtensions' => array(
-							'name' => 'imageExtensions','desc' => 'prop_file.imageExtensions_desc','type' => 'textfield','lexicon' => 'core:source'
-							,'value' => 'jpg,jpeg,png'
-						)
+						'name' => 'imageExtensions','desc' => 'prop_file.imageExtensions_desc','type' => 'textfield','lexicon' => 'core:source'
+						,'value' => 'jpg,jpeg,png'
+					)
 					,'thumbnailType' => array(
-							'name' => 'thumbnailType','desc' => 'prop_file.thumbnailType_desc','type' => 'list','lexicon' => 'core:source'
-							,'options' => array(array('value' => 'png','text' => 'png'), array('value' => 'jpg','text' => 'jpg'))
-							,'value' => 'jpg'
-						)
+						'name' => 'thumbnailType','desc' => 'prop_file.thumbnailType_desc','type' => 'list','lexicon' => 'core:source'
+						,'options' => array(array('value' => 'png','text' => 'png'), array('value' => 'jpg','text' => 'jpg'))
+						,'value' => 'jpg'
+					)
 				)
 				,'is_stream' => 1
 			);

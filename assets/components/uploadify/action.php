@@ -17,6 +17,12 @@ else {
 	$action = !empty($_FILES['Filedata']) ? 'form/upload' : $_REQUEST['action'];
 }
 
+if (!empty($_REQUEST['pageId']) && $resource = $modx->getObject('modResource', (int) $_REQUEST['pageId'])) {
+	if ($resource->get('context_key') != 'web') {
+		$modx->switchContext($resource->context_key);
+	}
+}
+
 /* @var Uploadify $Uploadify */
 $Uploadify = $modx->getService('uploadify','Uploadify',$modx->getOption('uploadify.core_path',null,$modx->getOption('core_path').'components/uploadify/').'model/uploadify/', array());
 

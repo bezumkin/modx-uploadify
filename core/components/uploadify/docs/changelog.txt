@@ -1,5 +1,10 @@
 Changelog for Uploadify.
 
+1.1.4 pl
+==============
+- Improved work in second context.
+- Files are named as hash from their content.
+
 1.1.3 pl
 ==============
 - Ability to overwrite chunks on package upgrade.

@@ -99,6 +99,8 @@ class Uploadify {
 	 *
 	 * @param string $ctx The context to load. Defaults to web.
 	 * @param array $scriptProperties Properties for initialization.
+	 *
+	 * @return bool
 	 */
 	public function initialize($ctx = 'web', $scriptProperties = array()) {
 		$this->config = array_merge($this->config, $scriptProperties);
@@ -123,7 +125,6 @@ class Uploadify {
 								,actionUrl: "'.$this->config['actionUrl'].'"
 								,cssUrl: "'.$this->config['cssUrl'].'web/"
 								,uploadiFive: '.$this->config['uploadiFive'].'
-
 							};
 							if(typeof jQuery == "undefined") {
 								document.write("<script src=\""+UploadifyConfig.jsUrl+"lib/jquery-1.9.1.min.js\" type=\"text/javascript\"><\/script>");
@@ -230,13 +231,15 @@ class Uploadify {
 		// Save image
 		if (in_array($data['extension'], $this->config['imageExtensions'])) {
 			if ($file = $this->saveImage($data)) {
+				$base_url = $this->modx->getOption('url_scheme', null, 'http://', true);
+				$base_url .= $this->modx->getOption('http_host');
 				$arr = array(
 					'image' => strpos($file['image'], '://') === false
-						? $this->modx->getOption('site_url') . substr($file['image'], 1)
+						? $base_url . '/' . ltrim($file['image'], '/')
 						: $file['thumb'],
 					'thumb' => !empty($file['thumb'])
 						? (strpos($file['thumb'], '://') === false
-							? $this->modx->getOption('site_url') . substr($file['thumb'], 1)
+							? $base_url . '/' . ltrim($file['thumb'], '/')
 							: ''
 						)
 						: ''
@@ -265,7 +268,8 @@ class Uploadify {
 	 * */
 	public function saveImage($data) {
 		if (is_uploaded_file($data['tmp_name'])) {
-			$hash = md5($data['tmp_name'] . rand());
+			$raw = file_get_contents($data['tmp_name']);
+			$hash = md5($raw);
 			$path = $hash[0] .'/'. $hash[1] . '/' . $hash[2] . '/';
 			$filename = $hash . '.' . $data['extension'];
 
@@ -277,7 +281,7 @@ class Uploadify {
 				,'path' => $path
 				,'file' => $filename
 				,'type' => 'image'
-				,'raw' => file_get_contents($data['tmp_name'])
+				,'raw' => $raw
 			));
 			if ($response->isError()) {
 				return $this->failure($response->getAllErrors());
