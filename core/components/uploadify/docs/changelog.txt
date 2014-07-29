@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.1.4-pl1
+==============
+- Rolled back random files names due to browser cache issues.
+
 1.1.4 pl
 ==============
 - Improved work in second context.

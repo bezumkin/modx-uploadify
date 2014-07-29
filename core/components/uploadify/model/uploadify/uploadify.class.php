@@ -269,7 +269,7 @@ class Uploadify {
 	public function saveImage($data) {
 		if (is_uploaded_file($data['tmp_name'])) {
 			$raw = file_get_contents($data['tmp_name']);
-			$hash = md5($raw);
+			$hash = md5($data['tmp_name'] . rand());
 			$path = $hash[0] .'/'. $hash[1] . '/' . $hash[2] . '/';
 			$filename = $hash . '.' . $data['extension'];
 
