@@ -229,10 +229,10 @@ class Uploadify {
 		}
 
 		// Save image
+		$base_url = $this->modx->getOption('url_scheme', null, 'http://', true);
+		$base_url .= $this->modx->getOption('http_host');
 		if (in_array($data['extension'], $this->config['imageExtensions'])) {
 			if ($file = $this->saveImage($data)) {
-				$base_url = $this->modx->getOption('url_scheme', null, 'http://', true);
-				$base_url .= $this->modx->getOption('http_host');
 				$arr = array(
 					'image' => strpos($file['image'], '://') === false
 						? $base_url . '/' . ltrim($file['image'], '/')
@@ -251,7 +251,7 @@ class Uploadify {
 		else {
 			if ($file = $this->saveFile($data)) {
 				$arr = array(
-					'file' => $this->modx->getOption('site_url') . substr($file['file'], 1)
+					'file' => $base_url . '/' . ltrim($file['file'], '/')
 				);
 				return $this->success($this->modx->getChunk($this->config['tplFile'], $arr));
 			}

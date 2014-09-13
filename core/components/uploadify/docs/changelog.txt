@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.1.5-pl
+==============
+- Fixed generation of urls for files.
+
 1.1.4-pl1
 ==============
 - Rolled back random files names due to browser cache issues.
