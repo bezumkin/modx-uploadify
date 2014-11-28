@@ -7,7 +7,7 @@ $_lang['uf_prop_tplFile'] = 'Chunk for uploaded file.';
 $_lang['uf_prop_tplOption'] = 'Chunk for one options of thumbnail generation.';
 
 $_lang['uf_prop_maxFilesize'] = 'Maximum allowed file size for upload.';
-$_lang['uf_prop_uploadiFive'] = 'You need to enable this options if you bought and installed HTML5 version of uploader from http://http://www.uploadify.com/download/download-uploadifive-standard/';
+$_lang['uf_prop_uploadiFive'] = 'Activation of HTML5 version of uploader, without a flash';
 $_lang['uf_prop_fileExtensions'] = 'Comma separated list of files allowed files extensions.';
 $_lang['uf_prop_imageExtensions'] = 'Comma separated list of extension, that is an image, so requires advanced processing.';
 $_lang['uf_prop_imageMaxWidth'] = 'Maximum width of uploaded image. If image has more width - it will be resized to fit.';
