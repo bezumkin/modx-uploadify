@@ -308,8 +308,17 @@ class Uploadify {
 
 			$options = array(
 				'q' => $this->config['imageQuality']
-				,'bg' => $this->config['thumbBG']
+				,'f' => !empty($dimension['mime']) && preg_match('#^image/(.*)#', $dimension['mime'], $matches)
+					? $matches[1]
+					: 'jpg'
 			);
+
+			// We can`t resize animated GIF
+			if ($options['f'] == 'gif' && preg_match_all('#\x00\x21\xF9\x04.{4}\x00\x2C#s', $raw, $matches)) {
+				if (count($matches[0]) > 1) {
+					return $arr;
+				}
+			}
 
 			// Images from retina display can be reduced twice
 			if ($this->config['fromRetina']) {

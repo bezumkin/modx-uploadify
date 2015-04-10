@@ -1,5 +1,10 @@
 Changelog for Uploadify.
 
+1.1.6-pl
+==============
+- Improved support of animated GIFs.
+- Enabled logging of phpThumb messages on level INFO.
+
 1.1.5-pl1
 ==============
 - Fixed generation of urls for files.

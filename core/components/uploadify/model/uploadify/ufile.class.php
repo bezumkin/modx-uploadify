@@ -95,11 +95,15 @@ class uFile extends xPDOSimpleObject {
 			if ($phpThumb->RenderOutput()) {
 				@unlink($phpThumb->sourceFilename);
 				@unlink($tmp);
+				$this->xpdo->log(modX::LOG_LEVEL_INFO, '[Uploadify] phpThumb messages for "'.$this->get('url').'". '.print_r($phpThumb->debugmessages,1));
+
 				return $phpThumb->outputImageData;
 			}
 		}
+		@unlink($phpThumb->sourceFilename);
+		@unlink($tmp);
+		$this->xpdo->log(modX::LOG_LEVEL_ERROR, '[Uploadify] Could not resize "'.$this->get('url').'". '.print_r($phpThumb->debugmessages,1));
 
-		$this->xpdo->log(modX::LOG_LEVEL_ERROR, 'Could not resize "'.$this->get('url').'". '.print_r($phpThumb->debugmessages,1));
 		return false;
 	}
 
