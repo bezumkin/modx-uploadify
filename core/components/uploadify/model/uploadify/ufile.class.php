@@ -1,89 +1,144 @@
 <?php
+
 class uFile extends xPDOSimpleObject {
-	public $file;
-	/* @var modPhpThumb $phpThumb */
+	/** @var modPhpThumb $phpThumb */
 	public $phpThumb;
-	/* @var modMediaSource $mediaSource */
+	/** @var modMediaSource $mediaSource */
 	public $mediaSource;
 
 
-	public function initializeMediaSource($ctx = 'web') {
-		if ($this->mediaSource) {return true;}
-		else if  ($this->mediaSource = $this->xpdo->getObject('sources.modMediaSource', $this->get('source'))) {
+	/**
+	 * @param string $ctx
+	 *
+	 * @return bool
+	 */
+	public function prepareSource($ctx = 'web') {
+		if ($this->mediaSource) {
+			$this->mediaSource->errors = array();
+			return $this->mediaSource;
+		}
+		elseif ($this->mediaSource = $this->xpdo->getObject('sources.modMediaSource', $this->get('source'))) {
 			$this->mediaSource->set('ctx', $ctx);
 			$this->mediaSource->initialize();
-			return true;
+
+			return $this->mediaSource;
 		}
-		else {
+
+		return false;
+	}
+
+
+	/**
+	 * @param array $options
+	 * @param null $raw
+	 *
+	 * @return bool|string
+	 */
+	public function Resize(array $options, $raw = null) {
+		if ($this->get('type') != 'image') {
 			return false;
 		}
+		elseif (!$raw = $this->_phpThumb($options, $raw)) {
+			return false;
+		}
+
+		$filename = $this->get('path') . $this->get('file');
+		if ($this->prepareSource()) {
+			$this->mediaSource->updateObject($filename, $raw);
+			if (empty($this->mediaSource->errors['file'])) {
+				$this->set('size', strlen($raw));
+				$this->save();
+
+				return $this->mediaSource->getObjectUrl($filename);
+			}
+			else {
+				$this->xpdo->log(modX::LOG_LEVEL_ERROR, "Could not update file {$filename}: " . $this->mediaSource->errors['file']);
+			}
+		}
+
+		return false;
 	}
 
 
-	public function Resize(array $options) {
-		if ($this->get('type') != 'image') {return false;}
-
-		$this->initializeMediaSource();
-		$this->file = $this->mediaSource->getObjectContents($this->get('path').$this->get('file'));
-		$raw = $this->phpThumb($options);
-
-		$file = $this->mediaSource->updateObject(
-			$this->get('path') . $this->get('file')
-			,$raw
-		);
-
-		$this->set('size', strlen($raw));
-		$this->save();
-
-		return $file ? $this->mediaSource->getObjectUrl($this->get('path').$this->get('file')) : false;
-	}
-
-
-	public function makeThumbnail(array $options) {
-		if ($this->get('type') != 'image') {return false;}
-
-		$this->initializeMediaSource();
-		$this->file = $this->mediaSource->getObjectContents($this->get('path').$this->get('file'));
-		$raw = $this->phpThumb($options);
+	/**
+	 * @param array $options
+	 * @param null $raw
+	 *
+	 * @return bool|string
+	 */
+	public function makeThumbnail(array $options, $raw = null) {
+		if ($this->get('type') != 'image') {
+			return false;
+		}
+		elseif (!$raw = $this->_phpThumb($options, $raw)) {
+			return false;
+		}
 
 		$new_file = $this->getThumbName($options);
-		$file = $this->mediaSource->createObject(
-			$this->get('path')
-			,$new_file
-			,$raw
-		);
+		if ($this->prepareSource()) {
+			$this->mediaSource->createObject($this->get('path'), $new_file, $raw);
+			if (empty($this->mediaSource->errors['file'])) {
+				$url = $this->mediaSource->getObjectUrl($this->get('path') . $new_file);
+				$thumb = $this->xpdo->newObject('uFile');
+				$thumb->fromArray(array_merge(
+						$this->toArray(),
+						array(
+							'file' => $new_file,
+							'size' => strlen($raw),
+							'parent' => $this->get('id'),
+							'url' => $url,
+						)
+					)
+				);
+				$thumb->save();
 
-		$url = $this->mediaSource->getObjectUrl($this->get('path').$new_file);
-		$thumb = $this->xpdo->newObject('uFile');
-		$thumb->fromArray(array_merge(
-			$this->toArray()
-			,array(
-				'file' => $new_file
-				,'size' => strlen($raw)
-				,'parent' => $this->id
-				,'url' => $url
-			))
-		);
-		$thumb->save();
+				return $url;
+			}
+			else {
+				$this->xpdo->log(modX::LOG_LEVEL_ERROR, "Could not create file {$new_file}: " . $this->mediaSource->errors['file']);
+			}
+		}
 
-		return $file ? $url : false;
+		return false;
 	}
 
 
-	public function getThumbName(array $options = array()) {
-		$tmp = explode('.', $this->get('file'));
-		$ext = !empty($options['f']) ? $options['f'] : $tmp[1];
-		return $tmp[0] . 's.' . $ext;
-	}
+	/**
+	 * @param array $options
+	 * @param null $raw
+	 *
+	 * @return bool|null
+	 */
+	protected function _phpThumb(array $options = array(), $raw = null) {
+		if ($this->get('type') != 'image') {
+			return false;
+		}
+		elseif (!class_exists('modPhpThumb')) {
+			/** @noinspection PhpIncludeInspection */
+			require MODX_CORE_PATH . 'model/phpthumb/modphpthumb.class.php';
+		}
+		if (empty($raw)) {
+			$prepare = $this->prepareSource();
+			if ($prepare !== true) {
+				return $prepare;
+			}
 
+			$filename = $this->get('path') . $this->get('file');
+			$info = $this->mediaSource->getObjectContents($filename);
+			if (!is_array($info)) {
+				return "Could not retrieve contents of file {$filename} from media source.";
+			}
+			elseif (!empty($this->mediaSource->errors['file'])) {
+				return "Could not retrieve file {$filename} from media source: " . $this->mediaSource->errors['file'];
+			}
+			$raw = $info['content'];
+		}
 
-	public function phpThumb($options = array()) {
-		require_once MODX_CORE_PATH . 'model/phpthumb/modphpthumb.class.php';
 		$phpThumb = new modPhpThumb($this->xpdo);
 		$phpThumb->initialize();
 
 		$tmp = tempnam(MODX_BASE_PATH, 'uf_');
-		file_put_contents($tmp, $this->file['content']);
+		file_put_contents($tmp, $raw);
 		$phpThumb->setSourceFilename($tmp);
 
 		foreach ($options as $k => $v) {
@@ -95,39 +150,75 @@ class uFile extends xPDOSimpleObject {
 			if ($phpThumb->RenderOutput()) {
 				@unlink($phpThumb->sourceFilename);
 				@unlink($tmp);
-				$this->xpdo->log(modX::LOG_LEVEL_INFO, '[Uploadify] phpThumb messages for "'.$this->get('url').'". '.print_r($phpThumb->debugmessages,1));
+				$this->xpdo->log(modX::LOG_LEVEL_INFO, '[Uploadify] phpThumb messages for "' . $this->get('url') . '". ' . print_r($phpThumb->debugmessages, 1));
 
 				return $phpThumb->outputImageData;
 			}
 		}
 		@unlink($phpThumb->sourceFilename);
 		@unlink($tmp);
-		$this->xpdo->log(modX::LOG_LEVEL_ERROR, '[Uploadify] Could not resize "'.$this->get('url').'". '.print_r($phpThumb->debugmessages,1));
+		$this->xpdo->log(modX::LOG_LEVEL_ERROR, '[Uploadify] Could not resize "' . $this->get('url') . '". ' . print_r($phpThumb->debugmessages, 1));
 
 		return false;
 	}
 
 
-	public function createFile($raw) {
-		$this->initializeMediaSource();
+	/**
+	 * @param array $options
+	 *
+	 * @return string
+	 */
+	public function getThumbName(array $options = array()) {
+		$tmp = explode('.', $this->get('file'));
+		$ext = !empty($options['f'])
+			? $options['f']
+			: $tmp[1];
 
-		$this->mediaSource->createContainer($this->get('path'), '/');
-		$file = $this->mediaSource->createObject(
-			$this->get('path')
-			,$this->get('file')
-			,$raw
-		);
-
-		return $file ? $this->mediaSource->getObjectUrl($this->get('path').$this->get('file')) : false;
+		return $tmp[0] . 's.' . $ext;
 	}
 
 
-	public function remove(array $ancestors= array ()) {
-		$this->initializeMediaSource();
-		$this->mediaSource->removeObject($this->get('path').$this->get('file'));
+	/**
+	 * @param $raw
+	 *
+	 * @return bool|string
+	 */
+	public function createFile($raw) {
+		if ($this->prepareSource()) {
+			$this->mediaSource->createContainer($this->get('path'), '/');
+
+			if ($file = $this->mediaSource->createObject($this->get('path'), $this->get('file'), $raw)) {
+				return $this->mediaSource->getObjectUrl($this->get('path') . $this->get('file'));
+			}
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * @param array $ancestors
+	 *
+	 * @return bool
+	 */
+	public function remove(array $ancestors = array()) {
+		$filename = $this->get('path') . $this->get('file');
+		if ($this->prepareSource()) {
+			$this->mediaSource->removeObject($filename);
+			if (!empty($this->mediaSource->errors['file'])) {
+				$this->xpdo->log(xPDO::LOG_LEVEL_ERROR,
+					'[Uploadify] Could not remove file at "' . $filename . '": ' . $this->mediaSource->errors['file']
+				);
+			}
+		}
+
+		$children = $this->xpdo->getIterator('uFile', array('parent' => $this->get('id')));
+		/** @var uFile $child */
+		foreach ($children as $child) {
+			$child->remove();
+		}
 
 		return parent::remove($ancestors);
 	}
-
 
 }

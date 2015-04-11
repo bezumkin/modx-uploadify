@@ -30,12 +30,14 @@ class uFileCreateProcessor extends modObjectCreateProcessor {
 		$this->object->set('raw', '');
 
 		$this->object->fromArray(array(
-			'createdon' => date('Y-m-d H:i:s')
-			,'createdby' => empty($this->modx->user->id) && !empty($_SESSION['uid']) ? $_SESSION['uid'] : $this->modx->user->id
-			,'ip' => $this->modx->request->getClientIp()
-			,'url' => $url
-			,'parent' => 0
-			,'size' => strlen($raw)
+			'createdon' => date('Y-m-d H:i:s'),
+			'createdby' => empty($this->modx->user->id) && !empty($_SESSION['uid'])
+				? $_SESSION['uid']
+				: $this->modx->user->id,
+			'ip' => $this->modx->request->getClientIp(),
+			'url' => $url,
+			'parent' => 0,
+			'size' => strlen($raw),
 		));
 
 		return parent::beforeSave();

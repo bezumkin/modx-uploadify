@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.2.0-pl
+==============
+- Some code optimizations and improvements.
+
 1.1.6-pl
 ==============
 - Improved support of animated GIFs.

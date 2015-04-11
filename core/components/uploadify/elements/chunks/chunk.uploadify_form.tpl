@@ -16,9 +16,10 @@
 					<select name="ThumbBG" class="span2 form-control">[[+listThumbBG]]</select>
 				</span>
 			</div>
-			<label class="checkbox" for="fromRetina">
+			<div class="form-group">
+				<label class="checkbox" for="fromRetina"></label>
 				<input type="checkbox" name="fromRetina" id="fromRetina" value="1" [[+fromRetina:notempty=`checked`]] /> [[%uf_frontend_from_retina]]
-			</label>
+			</div>
 			<small>
 				[[%uf_frontend_file_extensions]]: [[+fileExtensions]]<br/>
 				[[%uf_frontend_max_filesize]]: [[+maxFilesize]]
