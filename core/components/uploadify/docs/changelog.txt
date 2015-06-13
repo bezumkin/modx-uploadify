@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.2.1-pl1
+==============
+- Updated pdoTools version in the installer.
+
 1.2.0-pl
 ==============
 - Some code optimizations and improvements.
