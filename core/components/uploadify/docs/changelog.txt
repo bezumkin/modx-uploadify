@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.2.2-pl
+==============
+- Improved installation script for MODX 2.4.
+
 1.2.1-pl1
 ==============
 - Updated pdoTools version in the installer.
