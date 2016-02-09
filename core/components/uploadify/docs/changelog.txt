@@ -1,5 +1,9 @@
 Changelog for Uploadify.
 
+1.2.3-pl
+==============
+- Fixed ability to upload anonymous files.
+
 1.2.2-pl
 ==============
 - Improved installation script for MODX 2.4.
