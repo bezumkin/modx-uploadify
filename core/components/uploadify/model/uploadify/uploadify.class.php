@@ -78,10 +78,12 @@ class Uploadify
 
         $tmp = array('ThumbSize', 'ThumbZC', 'ThumbBG');
         foreach ($tmp as $v) {
-            $this->config['option' . $v] = isset($_SESSION['UploadifyConfig']['option' . $v]) && in_array($_SESSION['UploadifyConfig']['option' . $v],
-                $this->config['list' . $v])
-                ? $_SESSION['UploadifyConfig']['option' . $v]
-                : $this->config['list' . $v][0];
+            $this->config['option' . $v] =
+                isset($_SESSION['UploadifyConfig']['option' . $v])
+                &&
+                in_array($_SESSION['UploadifyConfig']['option' . $v], $this->config['list' . $v])
+                    ? $_SESSION['UploadifyConfig']['option' . $v]
+                    : $this->config['list' . $v][0];
         }
 
         if (!empty($this->config['optionThumbSize'])) {
@@ -255,29 +257,25 @@ class Uploadify
         $base_url = $this->modx->getOption('url_scheme', null, 'http://', true);
         $base_url .= $this->modx->getOption('http_host');
         if (in_array($data['extension'], $this->config['imageExtensions'])) {
-            if ($file = $this->saveImage($data)) {
-                $arr = array(
-                    'image' => strpos($file['image'], '://') === false
-                        ? $base_url . '/' . ltrim($file['image'], '/')
-                        : $file['image'],
-                    'thumb' => !empty($file['thumb'])
-                        ? (strpos($file['thumb'], '://') === false
-                            ? $base_url . '/' . ltrim($file['thumb'], '/')
-                            : $file['thumb']
-                        )
-                        : '',
-                );
+            if ($arr = $this->saveImage($data)) {
+                $arr['image'] = strpos($arr['url'], '://') === false
+                    ? $base_url . '/' . ltrim($arr['url'], '/')
+                    : $arr['url'];
+                $arr['thumb'] = !empty($arr['thumb'])
+                    ? (strpos($arr['thumb'], '://') === false
+                        ? $base_url . '/' . ltrim($arr['thumb'], '/')
+                        : $arr['thumb']
+                    )
+                    : '';
 
                 return $this->success($this->modx->getChunk($this->config['tplImage'], $arr));
             }
-        } // Save file
-        else {
-            if ($file = $this->saveFile($data)) {
-                $arr = array(
-                    'file' => strpos($file['file'], '://') === false
-                        ? $base_url . '/' . ltrim($file['file'], '/')
-                        : $file['file'],
-                );
+        } else {
+            // Save file
+            if ($arr = $this->saveFile($data)) {
+                $arr['file'] = strpos($arr['url'], '://') === false
+                    ? $base_url . '/' . ltrim($arr['url'], '/')
+                    : $arr['url'];
 
                 return $this->success($this->modx->getChunk($this->config['tplFile'], $arr));
             }
@@ -320,9 +318,8 @@ class Uploadify
 
         /** @var uFile $file */
         $file = $this->modx->getObject('uFile', $response->response['object']['id']);
-        $arr = array(
-            'image' => $file->get('url'),
-        );
+        $arr = $file->toArray();
+
         $dimension = getimagesize($data['tmp_name']);
 
         if ($dimension[0] > $this->config['thumbWidth'] || $dimension[1] > $this->config['thumbHeight']) {
@@ -428,11 +425,8 @@ class Uploadify
 
             /** @var uFile $file */
             $file = $this->modx->getObject('uFile', $response->response['object']['id']);
-            $arr = array(
-                'file' => $file->get('url'),
-            );
 
-            return $arr;
+            return $file->toArray();
 
         }
 
