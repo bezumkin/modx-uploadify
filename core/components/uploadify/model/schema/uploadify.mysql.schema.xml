@@ -1,31 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model package="uploadify" version="1.1" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" phpdoc-package="tickets">
+<model package="uploadify" version="1.1" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM"
+       phpdoc-package="tickets">
 
-	<object class="uFile" table="uploadify_files" extends="xPDOSimpleObject">
-		<field key="source" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
-		<field key="parent" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
-		<field key="name" dbtype="varchar" precision="255" phptype="string" null="false" />
-		<field key="description" dbtype="text" phptype="string" null="true" />
-		<field key="path" dbtype="varchar" precision="255" phptype="string" null="false" />
-		<field key="file" dbtype="varchar" precision="255" phptype="string" null="false" />
-		<field key="type" dbtype="varchar" precision="50" phptype="string" null="true" />
-		<field key="size" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
-		<field key="createdon" dbtype="datetime" phptype="datetime" null="true" default="0000-00-00 00:00:00" />
-		<field key="createdby" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
-		<field key="url" dbtype="varchar" precision="255" phptype="string" null="false" />
-		<field key="ip" dbtype="text" phptype="json" null="false" />
+    <object class="uFile" table="uploadify_files" extends="xPDOSimpleObject">
+        <field key="source" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false"
+               default="0"/>
+        <field key="parent" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false"
+               default="0"/>
+        <field key="name" dbtype="varchar" precision="255" phptype="string" null="false"/>
+        <field key="description" dbtype="text" phptype="string" null="true"/>
+        <field key="path" dbtype="varchar" precision="255" phptype="string" null="false"/>
+        <field key="file" dbtype="varchar" precision="255" phptype="string" null="false"/>
+        <field key="type" dbtype="varchar" precision="50" phptype="string" null="true"/>
+        <field key="size" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="createdon" dbtype="datetime" phptype="datetime" null="true" default="0000-00-00 00:00:00"/>
+        <field key="createdby" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false"
+               default="0"/>
+        <field key="url" dbtype="varchar" precision="255" phptype="string" null="false"/>
+        <field key="ip" dbtype="text" phptype="json" null="false"/>
 
-		<index alias="type" name="type" primary="false" unique="false" type="BTREE" >
-			<column key="type" length="" collation="A" null="false" />
-		</index>
-		<index alias="parent" name="parent" primary="false" unique="false" type="BTREE" >
-			<column key="parent" length="" collation="A" null="false" />
-		</index>
+        <index alias="type" name="type" primary="false" unique="false" type="BTREE">
+            <column key="type" length="" collation="A" null="false"/>
+        </index>
+        <index alias="parent" name="parent" primary="false" unique="false" type="BTREE">
+            <column key="parent" length="" collation="A" null="false"/>
+        </index>
 
-		<composite alias="Children" class="uFile" local="id" foreign="parent" cardinality="many" owner="local" />
-		<aggregate alias="Parent" class="uFile" local="parent" foreign="id" cardinality="one" owner="foreign" />
-		<aggregate alias="User" class="modUser" local="createdby" foreign="id" cardinality="one" owner="foreign" />
-	</object>
-
+        <composite alias="Children" class="uFile" local="id" foreign="parent" cardinality="many" owner="local"/>
+        <aggregate alias="Parent" class="uFile" local="parent" foreign="id" cardinality="one" owner="foreign"/>
+        <aggregate alias="User" class="modUser" local="createdby" foreign="id" cardinality="one" owner="foreign"/>
+    </object>
 
 </model>

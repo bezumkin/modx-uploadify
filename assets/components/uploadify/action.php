@@ -38,7 +38,7 @@ switch ($action) {
     default:
         $response = $modx->toJSON(array(
             'success' => false,
-            'message' => 'no action'
+            'message' => 'no action',
         ));
 }
 
