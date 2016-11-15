@@ -1,5 +1,10 @@
 Changelog for Uploadify.
 
+1.3.1-pl
+==============
+- Updated forms in chunks to register javascript at the bottom of page.
+- Fixed possible warning at line 151 of ufile.class.php at MODX 2.5.2.
+
 1.3.0-pl
 ==============
 - PSR-2 code format.

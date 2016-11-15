@@ -148,7 +148,6 @@ class uFile extends xPDOSimpleObject
         }
 
         if ($phpThumb->GenerateThumbnail()) {
-            imageinterlace($phpThumb->gdimg_output, true);
             if ($phpThumb->RenderOutput()) {
                 @unlink($phpThumb->sourceFilename);
                 @unlink($tmp);

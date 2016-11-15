@@ -48,7 +48,7 @@
     </i>
 </div>
 
-<script type="text/javascript">
+[[*id:input=`<script type="text/javascript">
     $(function () {
         $('#UploadifyForm').uploadify({
             width: 150,
@@ -71,4 +71,4 @@
             swf: '[[+assetsUrl]]uploadify.swf'
         });
     });
-</script>
+</script>`:jsToBottom]]

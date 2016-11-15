@@ -48,7 +48,7 @@
     </i>
 </div>
 
-<script type="text/javascript">
+[[*id:input=`<script type="text/javascript">
     $(function () {
         $('#UploadifyForm').uploadifive({
             width: 150,
@@ -70,4 +70,4 @@
             uploadScript: '[[+actionUrl]]'
         });
     });
-</script>
+</script>`:jsToBottom]]
